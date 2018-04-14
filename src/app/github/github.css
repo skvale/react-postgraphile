@@ -1,0 +1,11 @@
+.github-panel-table {
+  border: 1px solid #dbdbdb;
+}
+
+.github-panel-table-row {
+  cursor: pointer;
+}
+
+.github-panel-table-row-icon {
+  color: black;
+}

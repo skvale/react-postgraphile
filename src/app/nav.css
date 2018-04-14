@@ -1,0 +1,55 @@
+.navbar {
+  overflow: hidden;
+}
+
+.nav-user-icon {
+  margin-top: -4px;
+  margin-right: 4px;
+}
+
+.nav-user {
+  margin-top: 6px;
+  margin-right: 8px;
+  z-index: 2;
+}
+
+.nav-user-signout {
+  margin-top: 6px;
+  margin-right: 8px;
+}
+
+a.navbar-item {
+  padding-left: 0;
+}
+
+.nav-logo {
+  background: #444;
+  color: #eee;
+  border-radius: 50%;
+  left: 24px;
+  padding: 4px;
+  margin-left: 16px;
+  transition: 2s;
+  z-index: 2;
+}
+
+.nav-logo:hover {
+  transform: rotate(720deg);
+}
+
+.nav-title {
+  background: white;
+  left: 72px;
+  padding: 4px 16px;
+  border-radius: 3px;
+  z-index: 2;
+  margin-left: 16px;
+}
+
+.nav-logo-texture {
+  background-color: white;
+}
+
+.navbar-rough-canvas {
+  position: absolute;
+}
