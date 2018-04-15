@@ -20,7 +20,7 @@ const NotesCreator = pullRequest => {
     constructor(props) {
       super(props)
       this.state = {
-        value: props.data && props.data.prNoteByPullRequest && props.data.prNoteByPullRequest.content || ''
+        value: (props.data && props.data.prNoteByPullRequest && props.data.prNoteByPullRequest.content) || ''
       }
     }
 

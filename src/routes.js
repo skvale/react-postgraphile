@@ -1,6 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
 import { Fragment } from 'redux-little-router'
 import App from  'src/app/app'
 import Registration from 'src/app/register'

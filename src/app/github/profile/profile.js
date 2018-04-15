@@ -40,7 +40,7 @@ class Profile extends React.Component {
     if (!user) {
       return '...'
     }
-    if (user.githubAuth && !this.state.edit || this.state.submitted) {
+    if ((user.githubAuth && !this.state.edit) || this.state.submitted) {
       return (
         <div>
           Github token: {user.githubAuth}
@@ -86,11 +86,11 @@ class Profile extends React.Component {
 }
 
 Profile.propTypes = {
+  setUser: PropTypes.func.isRequired,
+  updateUserGithubAuth: PropTypes.func.isRequired,
   user: PropTypes.shape({
     githubAuth: PropTypes.string
-  }),
-  setUser: PropTypes.func.isRequired,
-  updateUserGithubAuth: PropTypes.func.isRequired
+  })
 }
 
 const WrappedProfile = graphql(

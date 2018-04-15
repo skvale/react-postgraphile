@@ -24,6 +24,7 @@
     "roughjs": "^2.1.1"
   },
   "scripts": {
+    "format": "prettier-standard src/**/*.js",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "postgraphile": "postgraphile --connection postgres://localhost:5432/react_postgraphile --schema react_postgraphile --token react_postgraphile.jwt_token --default-role react_postgraphile_anonymous --secret your_secret --cors",
@@ -37,6 +38,7 @@
     "eslint-plugin-react": "^7.7.0",
     "jest": "^22.4.3",
     "jest-fetch-mock": "^1.5.0",
-    "postgraphile": "^4.0.0-beta.5"
+    "postgraphile": "^4.0.0-beta.5",
+    "prettier-standard": "^8.0.1"
   }
 }

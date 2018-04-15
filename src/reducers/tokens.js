@@ -1,15 +1,15 @@
-import { getCookie } from 'src/utils/cookies'
+import { getCookie } from "src/utils/cookies";
 
-const SET_TOKEN = 'SET_TOKEN'
+const SET_TOKEN = "SET_TOKEN";
 
 export const setToken = payload => ({
   type: SET_TOKEN,
   payload
-})
+});
 
 const initialState = {
-  token: getCookie('jwt_token')
-}
+  token: getCookie("jwt_token")
+};
 
 export default (state = initialState, action) => {
   switch (action.type) {
@@ -17,13 +17,13 @@ export default (state = initialState, action) => {
       if (!action.payload) {
         return {
           ...initialState
-        }
+        };
       }
       return {
         ...state,
         token: action.payload
-      }
+      };
     default:
-      return state
+      return state;
   }
-}
+};
