@@ -1,6 +1,7 @@
-## React Postgraphile
+React Postgraphile
+----
 
-### Why did you build this thing?
+### Why?
 
 I wanted to learn about Graphql and JWT tokens in Postgres
 
@@ -27,16 +28,15 @@ Using React-Apollo and Postgraphile's API generation.
                                  +------+
 ```
 
-### So what does the app do?
 Creating users and and authenticate with JWTs in Postgres.
 Add a Github auth token and manage your Pull Requests / Repos
 
-### What do you need?
+### You'll need
 * [Postgresql](https://www.postgresql.org/download/)
 * [Postgraphile](https://www.graphile.org/postgraphile) `yarn global add postgraphile` or `npm install -g postgraphile`
 * react-postgraphile `git clone https://github.com/skvale/react-postgraphile`
 
-### Getting it to work
+### Starting it
 ```bash
 cd react-postgraphile
 ```
