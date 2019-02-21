@@ -16,42 +16,46 @@ class GithubPanel extends React.Component {
     this.setState({ selectedRow })
   }
 
-  get renderTab() {
+  get renderTab () {
     const { pullRequests, repositories } = this.props
     const { selectedRow } = this.state
     return (
       <div>
         <table className='github-panel-table table is-fullwidth is-striped is-hoverable'>
           <tbody>
-            {
-              Object.values(pullRequests)
-                .filter(pr => pr.title.toLowerCase().includes(this.state.filter.toLowerCase()))
-                .sort((a, b) => repositories[a.repository].name.localeCompare(repositories[b.repository].name))
-                .map(pr => (
-                  <tr
-                    onClick={this.selectRow(pr.id)}
-                    className={`github-panel-table-row ${selectedRow === pr.id ? 'is-selected' : ''}`}
-                    key={pr.id}
-                  >
-                    <td className='repo-name'>
-                      <PullRequest className='icon is-small'/>
-                      {repositories[pr.repository].name}
-                    </td>
-                    <td className='pull-request'>
-                      {pr.title}
-                    </td>
-                    <td>
-                      <a
-                        className='button is-small'
-                        href={pr.url}
-                        target='_blank'
-                      >
-                        <ExternalLink className='github-panel-table-row-icon'/>
-                      </a>
-                    </td>
-                  </tr>
-                ))
-            }
+            {Object.values(pullRequests)
+              .filter(pr =>
+                pr.title.toLowerCase().includes(this.state.filter.toLowerCase())
+              )
+              .sort((a, b) =>
+                repositories[a.repository].name.localeCompare(
+                  repositories[b.repository].name
+                )
+              )
+              .map(pr => (
+                <tr
+                  onClick={this.selectRow(pr.id)}
+                  className={`github-panel-table-row ${
+                    selectedRow === pr.id ? 'is-selected' : ''
+                  }`}
+                  key={pr.id}
+                >
+                  <td className='repo-name'>
+                    <PullRequest className='icon is-small' />
+                    {repositories[pr.repository].name}
+                  </td>
+                  <td className='pull-request'>{pr.title}</td>
+                  <td>
+                    <a
+                      className='button is-small'
+                      href={pr.url}
+                      target='_blank'
+                    >
+                      <ExternalLink className='github-panel-table-row-icon' />
+                    </a>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
@@ -59,9 +63,12 @@ class GithubPanel extends React.Component {
   }
 
   search = e => {
-    this.setState({
-      filter: e.target.value
-    }, this.filter)
+    this.setState(
+      {
+        filter: e.target.value
+      },
+      this.filter
+    )
   }
 
   get notes () {
@@ -74,7 +81,7 @@ class GithubPanel extends React.Component {
     return null
   }
 
-  render() {
+  render () {
     const { loading, pullRequests } = this.props
     const { filter } = this.state
 
@@ -96,18 +103,16 @@ class GithubPanel extends React.Component {
             </p>
           </div>
           {loading && [
-            <div key={1} className='loading-panel'/>,
-            <div key={2} className='loading-panel'/>,
-            <div key={3} className='loading-panel'/>
+            <div key={1} className='loading-panel' />,
+            <div key={2} className='loading-panel' />,
+            <div key={3} className='loading-panel' />
           ]}
           {this.renderTab}
-          {!loading && Object.values(pullRequests).length === 0 &&
+          {!loading && Object.values(pullRequests).length === 0 && (
             <div>No data</div>
-          }
+          )}
         </nav>
-        <div className='columns is-one-third'>
-          { this.notes }
-        </div>
+        <div className='columns is-one-third'>{this.notes}</div>
       </div>
     )
   }
@@ -115,23 +120,24 @@ class GithubPanel extends React.Component {
 
 GithubPanel.propTypes = {
   loading: PropTypes.bool,
-  pullRequests: PropTypes.objectOf(PropTypes.shape({
-    id: PropTypes.string,
-    repository: PropTypes.string,
-    title: PropTypes.string,
-    url: PropTypes.string
-  })),
-  repositories: PropTypes.objectOf(PropTypes.shape({
-    id: PropTypes.string,
-    name: PropTypes.string,
-    url: PropTypes.string
-  }))
+  pullRequests: PropTypes.objectOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      repository: PropTypes.string,
+      title: PropTypes.string,
+      url: PropTypes.string
+    })
+  ),
+  repositories: PropTypes.objectOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      name: PropTypes.string,
+      url: PropTypes.string
+    })
+  )
 }
 
-export default connect(
-  ({ github }) =>
-    ({
-      pullRequests: github.pullRequests,
-      repositories: github.repositories
-    })
-)(GithubPanel)
+export default connect(({ github }) => ({
+  pullRequests: github.pullRequests,
+  repositories: github.repositories
+}))(GithubPanel)

@@ -5,7 +5,9 @@ const EmailPasswordFields = ({ emailRef, passwordRef }) => {
   return (
     <div className='columns'>
       <div className='column field'>
-        <label className='label' htmlFor='sign-in-email'>Email</label>
+        <label className='label' htmlFor='sign-in-email'>
+          Email
+        </label>
         <input
           className='input'
           type='email'
@@ -15,7 +17,9 @@ const EmailPasswordFields = ({ emailRef, passwordRef }) => {
         />
       </div>
       <div className='column field'>
-        <label className='label' htmlFor='sign-in-password'>Password</label>
+        <label className='label' htmlFor='sign-in-password'>
+          Password
+        </label>
         <input
           className='input'
           type='password'

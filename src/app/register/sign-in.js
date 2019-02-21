@@ -10,16 +10,17 @@ class SignIn extends React.Component {
 
   handleSubmit = e => {
     e.preventDefault()
-    this.props.signIn({
-      email: this.email.value,
-      password: this.password.value
-    })
-    .catch(e => {
-      this.setState({
-        error: e.message,
-        failed: true
+    this.props
+      .signIn({
+        email: this.email.value,
+        password: this.password.value
       })
-    })
+      .catch(e => {
+        this.setState({
+          error: e.message,
+          failed: true
+        })
+      })
   }
 
   render () {
@@ -29,10 +30,16 @@ class SignIn extends React.Component {
         {this.state.failed && ' * failed'}
         <form>
           <EmailPasswordFields
-            emailRef={el => {this.email = el}}
-            passwordRef={el => {this.password = el}}
+            emailRef={el => {
+              this.email = el
+            }}
+            passwordRef={el => {
+              this.password = el
+            }}
           />
-          <button className='button is-link' onClick={this.handleSubmit}>Submit</button>
+          <button className='button is-link' onClick={this.handleSubmit}>
+            Submit
+          </button>
         </form>
         {this.state.error}
       </div>

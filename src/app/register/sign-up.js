@@ -1,4 +1,3 @@
-
 import React from 'react'
 import PropTypes from 'prop-types'
 import { graphql } from 'react-apollo'
@@ -16,7 +15,8 @@ class SignUp extends React.Component {
       email: this.email.value,
       password: this.password.value
     }
-    this.props.registerPerson(input)
+    this.props
+      .registerPerson(input)
       .then(this.signIn(input.email, input.password))
       .catch(e => {
         this.setState({
@@ -41,37 +41,50 @@ class SignUp extends React.Component {
         <form>
           <div className='columns'>
             <div className='column field'>
-              <label className='label' htmlFor='sign-in-first-name'>First name</label>
+              <label className='label' htmlFor='sign-in-first-name'>
+                First name
+              </label>
               <input
                 className='input'
                 id='sign-in-first-name'
-                ref={el => {this.firstName = el}}
+                ref={el => {
+                  this.firstName = el
+                }}
                 required
               />
             </div>
             <div className='column field'>
-              <label className='label' htmlFor='sign-in-last-name'>Last name</label>
+              <label className='label' htmlFor='sign-in-last-name'>
+                Last name
+              </label>
               <input
                 className='input'
                 id='sign-in-last-name'
-                ref={el => {this.lastName = el}}
+                ref={el => {
+                  this.lastName = el
+                }}
                 required
               />
             </div>
           </div>
 
           <EmailPasswordFields
-            emailRef={el => {this.email = el}}
-            passwordRef={el => {this.password = el}}
+            emailRef={el => {
+              this.email = el
+            }}
+            passwordRef={el => {
+              this.password = el
+            }}
           />
 
-          <button className='button is-link' onClick={this.handleSubmit}>Submit</button>
+          <button className='button is-link' onClick={this.handleSubmit}>
+            Submit
+          </button>
         </form>
         {this.state.error}
       </div>
     )
   }
-
 }
 
 SignUp.propTypes = {
@@ -81,13 +94,26 @@ SignUp.propTypes = {
 
 export default graphql(
   gql`
-  mutation Register ($firstName: String!, $lastName: String!, $email: String!, $password: String!) {
-    registerPerson(input: { firstName: $firstName, lastName: $lastName email: $email, password: $password }) {
-      person {
-        fullName
+    mutation Register(
+      $firstName: String!
+      $lastName: String!
+      $email: String!
+      $password: String!
+    ) {
+      registerPerson(
+        input: {
+          firstName: $firstName
+          lastName: $lastName
+          email: $email
+          password: $password
+        }
+      ) {
+        person {
+          fullName
+        }
       }
     }
-  }`,
+  `,
   {
     props: ({ mutate }) => ({
       registerPerson: variables => mutate({ variables })

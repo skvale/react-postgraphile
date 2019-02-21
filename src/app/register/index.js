@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import gql from 'graphql-tag'
 import { push } from 'redux-little-router'
 import { setCookie } from 'src/utils/cookies'
-import { setToken } from  'src/reducers/tokens'
+import { setToken } from 'src/reducers/tokens'
 import { noAuthClient } from 'src/clients/postgraphile'
 
 import SignUp from './sign-up'
@@ -16,10 +16,7 @@ class Registration extends React.Component {
     active: 'SIGN_IN'
   }
 
-  signIn = input => (
-    this.props.authenticate(input)
-      .then(this.handleNewToken)
-  )
+  signIn = input => this.props.authenticate(input).then(this.handleNewToken)
 
   handleNewToken = ({ data }) => {
     const { jwtToken } = data.authenticate
@@ -36,28 +33,28 @@ class Registration extends React.Component {
 
   toggle = () => {
     this.setState(prevState => ({
-      active: prevState.active === 'SIGN_IN'
-        ? 'SIGN_UP'
-        : 'SIGN_IN',
+      active: prevState.active === 'SIGN_IN' ? 'SIGN_UP' : 'SIGN_IN',
       invalidCredentials: false
     }))
   }
 
-  render() {
+  render () {
     return (
       <div>
         <div className='section'>
-          { this.state.active === 'SIGN_IN'
-          ? <SignIn signIn={this.signIn}/>
-          : <SignUp signIn={this.signIn}/>
-          }
-          <p className='help is-danger'>{this.state.invalidCredentials && ' * invalid login'}</p>
+          {this.state.active === 'SIGN_IN' ? (
+            <SignIn signIn={this.signIn} />
+          ) : (
+            <SignUp signIn={this.signIn} />
+          )}
+          <p className='help is-danger'>
+            {this.state.invalidCredentials && ' * invalid login'}
+          </p>
           <div>or</div>
           <button className='button' onClick={this.toggle}>
             {this.state.active === 'SIGN_IN'
-              ? 'I\'m a new user'
-              : 'I have an account'
-            }
+              ? "I'm a new user"
+              : 'I have an account'}
           </button>
         </div>
       </div>
@@ -73,11 +70,12 @@ Registration.propTypes = {
 
 const ApolloRegistration = graphql(
   gql`
-  mutation Authenticate ($email: String!, $password: String!) {
-    authenticate(input:{ email: $email, password: $password }) {
-      jwtToken
+    mutation Authenticate($email: String!, $password: String!) {
+      authenticate(input: { email: $email, password: $password }) {
+        jwtToken
+      }
     }
-  }`,
+  `,
   {
     options: {
       client: noAuthClient

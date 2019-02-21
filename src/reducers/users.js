@@ -1,13 +1,13 @@
-const SET_USER = "SET_USER";
+const SET_USER = 'SET_USER'
 
 export const setUser = payload => ({
   type: SET_USER,
   payload
-});
+})
 
 const initialState = {
   user: undefined
-};
+}
 
 export default (state = initialState, action) => {
   switch (action.type) {
@@ -15,7 +15,7 @@ export default (state = initialState, action) => {
       if (!action.payload) {
         return {
           ...initialState
-        };
+        }
       }
       return {
         ...state,
@@ -23,8 +23,8 @@ export default (state = initialState, action) => {
           ...state.user,
           ...action.payload
         }
-      };
+      }
     default:
-      return state;
+      return state
   }
-};
+}

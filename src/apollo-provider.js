@@ -7,14 +7,14 @@ import postgraphileClient from 'src/clients/postgraphile'
 import Routes from 'src/routes'
 
 class Provider extends React.Component {
-  componentDidMount() {
+  componentDidMount () {
     const { navigateToSignIn, token } = this.props
-    if(!token) {
+    if (!token) {
       navigateToSignIn()
     }
   }
 
-  render() {
+  render () {
     const { token } = this.props
     return (
       <ApolloProvider client={postgraphileClient(token)}>

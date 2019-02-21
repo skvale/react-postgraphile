@@ -10,5 +10,6 @@ import 'bulma/css/bulma.css'
 ReactDOM.render(
   <ReduxProvider store={store}>
     <ApolloProvider />
-  </ReduxProvider>
-, document.getElementById('root'))
+  </ReduxProvider>,
+  document.getElementById('root')
+)

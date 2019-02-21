@@ -12,8 +12,7 @@ import rough from 'roughjs'
 import './github.css'
 
 export class Github extends React.Component {
-
-  componentDidMount() {
+  componentDidMount () {
     if (this.canvas) {
       const rc = rough.canvas(this.canvas)
       rc.circle(195, 15, 24, { fill: '#309971' })
@@ -22,31 +21,32 @@ export class Github extends React.Component {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate () {
     const { data, setGithubData } = this.props
     if (data.viewer) {
       setGithubData(data.viewer)
     }
   }
 
-  render() {
+  render () {
     const { data } = this.props
     if (data.error) {
       return data.error.toString()
     }
 
-    const user = data.loading
-      ? null
-      : data.viewer.name
+    const user = data.loading ? null : data.viewer.name
 
     return (
       <div>
-        <canvas className='rough-canvas' ref={ el => { this.canvas = el } } />
+        <canvas
+          className='rough-canvas'
+          ref={el => {
+            this.canvas = el
+          }}
+        />
         <div className='margin'>
           <div className='app-user'>User: {user}</div>
-          <GithubPanel
-            loading={data.loading}
-          />
+          <GithubPanel loading={data.loading} />
         </div>
       </div>
     )
@@ -64,35 +64,47 @@ Github.propTypes = {
 }
 
 export const QUERY = gql`
-{
-  viewer {
-    id
-    name
-    pullRequests(first: 10, states: [OPEN]) {
-      nodes {
-        id
-        url
-        title
-        repository {
+  {
+    viewer {
+      id
+      name
+      pullRequests(last: 10, states: []) {
+        nodes {
           id
-          name
-        }
-        headRepositoryOwner {
-          login
-          avatarUrl
+          url
+          title
+          repository {
+            id
+            name
+          }
+          headRepositoryOwner {
+            login
+            avatarUrl
+          }
         }
       }
     }
   }
-}
 `
 
 export default auth => {
   return auth
-    ? connect(null, ({ setGithubData: setGithubData }))(graphql(QUERY, {
-      options: {
-        client: githubClient(auth)
-      }
-    })(Github))
-    : () => <div>No github token <Link className='button' href='/profile'>Set one</Link></div>
+    ? connect(
+        null,
+        { setGithubData: setGithubData }
+      )(
+        graphql(QUERY, {
+          options: {
+            client: githubClient(auth)
+          }
+        })(Github)
+      )
+    : () => (
+        <div>
+          No github token{' '}
+          <Link className='button' href='/profile'>
+            Set one
+          </Link>
+        </div>
+      )
 }

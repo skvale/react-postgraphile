@@ -17,10 +17,14 @@ const NotesCreator = pullRequest => {
       updatePrNote: PropTypes.func
     }
 
-    constructor(props) {
+    constructor (props) {
       super(props)
       this.state = {
-        value: (props.data && props.data.prNoteByPullRequest && props.data.prNoteByPullRequest.content) || ''
+        value:
+          (props.data &&
+            props.data.prNoteByPullRequest &&
+            props.data.prNoteByPullRequest.content) ||
+          ''
       }
     }
 
@@ -28,13 +32,13 @@ const NotesCreator = pullRequest => {
       const { data } = this.props
       const { data: prevData } = prevProps
 
-      if (data
-        && data.prNoteByPullRequest
-        && (
-          !prevData
-          || !prevData.prNoteByPullRequest
-          || data.prNoteByPullRequest.content !== prevData.prNoteByPullRequest.content
-        )
+      if (
+        data &&
+        data.prNoteByPullRequest &&
+        (!prevData ||
+          !prevData.prNoteByPullRequest ||
+          data.prNoteByPullRequest.content !==
+            prevData.prNoteByPullRequest.content)
       ) {
         this.setState({
           value: data.prNoteByPullRequest.content
@@ -49,25 +53,35 @@ const NotesCreator = pullRequest => {
     }
 
     create = () => {
-      this.props.createPrNote({pullRequest, content: ''})
+      this.props
+        .createPrNote({ pullRequest, content: '' })
         .then(this.props.data.refetch)
     }
 
     update = () => {
-      this.props.updatePrNote({pullRequest, content: this.state.value})
+      this.props
+        .updatePrNote({ pullRequest, content: this.state.value })
         .then(this.props.data.refetch)
     }
 
     render () {
       return (
         <div>
-          {!this.props.data.loading && !this.props.data.prNoteByPullRequest && <button className='button' onClick={ this.create }>Create</button>}
-          <button className='button' onClick={ this.update }>Update</button>
-          <div className={ `control ${this.props.data.loading ? 'is-loading' : ''}` }>
+          {!this.props.data.loading && !this.props.data.prNoteByPullRequest && (
+            <button className='button' onClick={this.create}>
+              Create
+            </button>
+          )}
+          <button className='button' onClick={this.update}>
+            Update
+          </button>
+          <div
+            className={`control ${this.props.data.loading ? 'is-loading' : ''}`}
+          >
             <textarea
               className='textarea'
-              onChange={ this.onChange }
-              value={ this.state.value }
+              onChange={this.onChange}
+              value={this.state.value}
             />
           </div>
         </div>
@@ -76,39 +90,55 @@ const NotesCreator = pullRequest => {
   }
 
   const WrappedNotes = compose(
-    graphql(gql`
-      query getPrNoteByPullRequest($pullRequest: String!) {
-        prNoteByPullRequest(pullRequest: $pullRequest) {
-          content
-          pullRequest
-        }
-      }`,
-      {
-      options: { variables: { pullRequest } }
-      }
-    ),
-    graphql(gql`
-      mutation createPrNote ($pullRequest: String!, $content: String!) {
-        createPrNote(input: {prNote: { pullRequest: $pullRequest,  content: $content}}) {
-          prNote {
+    graphql(
+      gql`
+        query getPrNoteByPullRequest($pullRequest: String!) {
+          prNoteByPullRequest(pullRequest: $pullRequest) {
+            content
             pullRequest
           }
         }
-      }`,
+      `,
+      {
+        options: { variables: { pullRequest } }
+      }
+    ),
+    graphql(
+      gql`
+        mutation createPrNote($pullRequest: String!, $content: String!) {
+          createPrNote(
+            input: { prNote: { pullRequest: $pullRequest, content: $content } }
+          ) {
+            prNote {
+              pullRequest
+            }
+          }
+        }
+      `,
       {
         props: ({ mutate }) => ({
           createPrNote: variables => mutate({ variables })
         })
       }
     ),
-    graphql(gql`
-      mutation updatePrNoteByPullRequest ($pullRequest: String!, $content: String!) {
-        updatePrNoteByPullRequest(input: {pullRequest: $pullRequest, prNotePatch: { content: $content } }) {
-          prNote {
-            content
+    graphql(
+      gql`
+        mutation updatePrNoteByPullRequest(
+          $pullRequest: String!
+          $content: String!
+        ) {
+          updatePrNoteByPullRequest(
+            input: {
+              pullRequest: $pullRequest
+              prNotePatch: { content: $content }
+            }
+          ) {
+            prNote {
+              content
+            }
           }
         }
-      }`,
+      `,
       {
         props: ({ mutate }) => ({
           updatePrNote: variables => mutate({ variables })

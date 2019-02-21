@@ -1,6 +1,6 @@
 import React from 'react'
 import { Fragment } from 'redux-little-router'
-import App from  'src/app/app'
+import App from 'src/app/app'
 import Registration from 'src/app/register'
 import Profile from 'src/app/github/profile/profile'
 import SignOut from 'src/app/sign-out'

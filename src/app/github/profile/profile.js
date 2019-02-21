@@ -35,7 +35,7 @@ class Profile extends React.Component {
     })
   }
 
-  get content() {
+  get content () {
     const { user } = this.props
     if (!user) {
       return '...'
@@ -55,8 +55,17 @@ class Profile extends React.Component {
     return (
       <div>
         <div className='field'>
-          <label className='label' htmlFor='profile-input'>Auth token</label>
-          <input className='input' type='text' id='profile-input' ref={el => { this.input = el }} />
+          <label className='label' htmlFor='profile-input'>
+            Auth token
+          </label>
+          <input
+            className='input'
+            type='text'
+            id='profile-input'
+            ref={el => {
+              this.input = el
+            }}
+          />
         </div>
         <div className='field is-grouped'>
           <div className='control'>
@@ -64,24 +73,20 @@ class Profile extends React.Component {
               Save
             </button>
           </div>
-          {user.githubAuth &&
+          {user.githubAuth && (
             <div className='control'>
               <button className='button' onClick={this.cancel}>
                 Cancel
               </button>
             </div>
-          }
+          )}
         </div>
       </div>
     )
   }
 
-  render() {
-    return (
-      <div className='section'>
-        {this.content}
-      </div>
-    )
+  render () {
+    return <div className='section'>{this.content}</div>
   }
 }
 
@@ -95,15 +100,18 @@ Profile.propTypes = {
 
 const WrappedProfile = graphql(
   gql`
-  mutation UpdateUserGithubAuth ($id: Int!, $githubAuth: String!) {
-    updatePersonById(input:{id: $id, personPatch:{githubAuth: $githubAuth}}) {
-      person {
-        fullName
-        githubAuth
-        id
+    mutation UpdateUserGithubAuth($id: Int!, $githubAuth: String!) {
+      updatePersonById(
+        input: { id: $id, personPatch: { githubAuth: $githubAuth } }
+      ) {
+        person {
+          fullName
+          githubAuth
+          id
+        }
       }
     }
-  }`,
+  `,
   {
     props: ({ mutate }) => ({
       updateUserGithubAuth: variables => mutate({ variables })
@@ -115,7 +123,7 @@ export default connect(
   ({ users }) => ({
     user: users.user
   }),
-  ({
+  {
     setUser
-  })
+  }
 )(WrappedProfile)
