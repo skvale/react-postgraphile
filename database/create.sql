@@ -1,136 +1,169 @@
-create schema react_postgraphile;
-create schema react_postgraphile_private;
-create extension if not exists "pgcrypto";
+CREATE SCHEMA react_postgraphile;
 
-create table react_postgraphile.person (
-  id               serial primary key,
-  first_name       text not null check (char_length(first_name) < 80),
-  last_name        text check (char_length(last_name) < 80),
-  github_auth      text,
-  created_at       timestamp default now()
+CREATE SCHEMA react_postgraphile_private;
+
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+CREATE TABLE react_postgraphile.person (
+  id serial PRIMARY KEY,
+  first_name text NOT NULL CHECK (char_length(first_name) < 80),
+  last_name text CHECK (char_length(last_name) < 80),
+  github_auth text,
+  created_at timestamp DEFAULT now()
 );
 
-comment on table react_postgraphile.person is 'A user of the site.';
-comment on column react_postgraphile.person.id is 'The primary unique identifier for the person.';
-comment on column react_postgraphile.person.first_name is 'The person’s first name.';
-comment on column react_postgraphile.person.last_name is 'The person’s last name.';
-comment on column react_postgraphile.person.created_at is 'The time this person was created.';
+COMMENT ON TABLE react_postgraphile.person IS 'A user of the site.';
 
-create function react_postgraphile.person_full_name(person react_postgraphile.person) returns text as $$
-  select person.first_name || ' ' || person.last_name
-$$ language sql stable;
+COMMENT ON COLUMN react_postgraphile.person.id IS 'The primary unique identifier for the person.';
 
-comment on function react_postgraphile.person_full_name(react_postgraphile.person) is 'A person’s full name which is a concatenation of their first and last name.';
+COMMENT ON COLUMN react_postgraphile.person.first_name IS 'The person’s first name.';
 
-create table react_postgraphile_private.person_account (
-  person_id        integer primary key references react_postgraphile.person(id) on delete cascade,
-  email            text not null unique check (email ~* '^.+@.+\..+$'),
-  password_hash    text not null
+COMMENT ON COLUMN react_postgraphile.person.last_name IS 'The person’s last name.';
+
+COMMENT ON COLUMN react_postgraphile.person.created_at IS 'The time this person was created.';
+
+CREATE FUNCTION react_postgraphile.person_full_name (person react_postgraphile.person)
+  RETURNS text
+  AS $$
+  SELECT
+    person.first_name || ' ' || person.last_name
+$$
+LANGUAGE sql
+STABLE;
+
+COMMENT ON FUNCTION react_postgraphile.person_full_name (react_postgraphile.person) IS 'A person’s full name which is a concatenation of their first and last name.';
+
+CREATE TABLE react_postgraphile_private.person_account (
+  person_id integer PRIMARY KEY REFERENCES react_postgraphile.person (id) ON DELETE CASCADE, email text NOT NULL UNIQUE CHECK (email ~* '^.+@.+\..+$'),
+  password_hash text NOT NULL
 );
 
-comment on table react_postgraphile_private.person_account is 'Private information about a person’s account.';
-comment on column react_postgraphile_private.person_account.person_id is 'The id of the person associated with this account.';
-comment on column react_postgraphile_private.person_account.email is 'The email address of the person.';
-comment on column react_postgraphile_private.person_account.password_hash is 'An opaque hash of the person’s password.';
+COMMENT ON TABLE react_postgraphile_private.person_account IS 'Private information about a person’s account.';
 
-create function react_postgraphile.register_person(
-  first_name text,
-  last_name text,
-  email text,
-  password text
-) returns react_postgraphile.person as $$
-declare
+COMMENT ON COLUMN react_postgraphile_private.person_account.person_id IS 'The id of the person associated with this account.';
+
+COMMENT ON COLUMN react_postgraphile_private.person_account.email IS 'The email address of the person.';
+
+COMMENT ON COLUMN react_postgraphile_private.person_account.password_hash IS 'An opaque hash of the person’s password.';
+
+CREATE FUNCTION react_postgraphile.register_person (first_name text, last_name text, email text, PASSWORD text)
+  RETURNS react_postgraphile.person
+  AS $$
+DECLARE
   person react_postgraphile.person;
-begin
-  insert into react_postgraphile.person (first_name, last_name) values
-    (first_name, last_name)
-    returning * into person;
+BEGIN
+  INSERT INTO react_postgraphile.person (first_name, last_name)
+  VALUES (first_name, last_name)
+RETURNING
+  * INTO person;
+  INSERT INTO react_postgraphile_private.person_account (person_id, email, password_hash)
+  VALUES (person.id, email, crypt(PASSWORD, gen_salt('bf')));
+  RETURN person;
+END;
+$$
+LANGUAGE plpgsql
+STRICT
+SECURITY DEFINER;
 
-  insert into react_postgraphile_private.person_account (person_id, email, password_hash) values
-    (person.id, email, crypt(password, gen_salt('bf')));
+COMMENT ON FUNCTION react_postgraphile.register_person (text, text, text, text) IS 'Registers a single user and creates an account in our site.';
 
-  return person;
-end;
-$$ language plpgsql strict security definer;
-
-comment on function react_postgraphile.register_person(text, text, text, text) is 'Registers a single user and creates an account in our site.';
-
-create type react_postgraphile.jwt_token as (
-  role text,
+CREATE TYPE react_postgraphile.jwt_token AS (
+  ROLE text,
   person_id integer
 );
 
-create function react_postgraphile.authenticate(
-  email text,
-  password text
-) returns react_postgraphile.jwt_token as $$
-declare
+CREATE FUNCTION react_postgraphile.authenticate (email text, PASSWORD text)
+  RETURNS react_postgraphile.jwt_token
+  AS $$
+DECLARE
   account react_postgraphile_private.person_account;
-begin
-  select a.* into account
-  from react_postgraphile_private.person_account as a
-  where a.email = $1;
+BEGIN
+  SELECT
+    a.* INTO account
+  FROM
+    react_postgraphile_private.person_account AS a
+  WHERE
+    a.email = $1;
+  IF account.password_hash = crypt(PASSWORD, account.password_hash) THEN
+    RETURN ('react_postgraphile_person',
+      account.person_id)::react_postgraphile.jwt_token;
+  ELSE
+    RETURN NULL;
+  END IF;
+END;
+$$
+LANGUAGE plpgsql
+STRICT
+SECURITY DEFINER;
 
-  if account.password_hash = crypt(password, account.password_hash) then
-    return ('react_postgraphile_person', account.person_id)::react_postgraphile.jwt_token;
-  else
-    return null;
-  end if;
-end;
-$$ language plpgsql strict security definer;
+COMMENT ON FUNCTION react_postgraphile.authenticate (text, text) IS 'Creates a JWT token that will securely identify a person and give them certain permissions.';
 
-comment on function react_postgraphile.authenticate(text, text) is 'Creates a JWT token that will securely identify a person and give them certain permissions.';
+CREATE FUNCTION react_postgraphile.current_person ()
+  RETURNS react_postgraphile.person
+  AS $$
+  SELECT
+    *
+  FROM
+    react_postgraphile.person
+  WHERE
+    id = current_setting('jwt.claims.person_id')::integer
+$$
+LANGUAGE sql
+STABLE;
 
-create function react_postgraphile.current_person() returns react_postgraphile.person as $$
-  select *
-  from react_postgraphile.person
-  where id = current_setting('jwt.claims.person_id')::integer
-$$ language sql stable;
+COMMENT ON FUNCTION react_postgraphile.current_person () IS 'Gets the person who was identified by our JWT.';
 
-comment on function react_postgraphile.current_person() is 'Gets the person who was identified by our JWT.';
+CREATE ROLE react_postgraphile LOGIN PASSWORD 'velvet';
 
-create role react_postgraphile login password 'velvet';
-create role react_postgraphile_anonymous;
-grant react_postgraphile_anonymous to react_postgraphile_anonymous;
+CREATE ROLE react_postgraphile_anonymous;
 
-create role react_postgraphile_person;
-grant react_postgraphile_person to react_postgraphile_anonymous;
+GRANT react_postgraphile_anonymous TO react_postgraphile_anonymous;
 
-alter default privileges revoke execute on functions from public;
+CREATE ROLE react_postgraphile_person;
 
+GRANT react_postgraphile_person TO react_postgraphile_anonymous;
 
-grant select on table react_postgraphile.person to react_postgraphile_anonymous, react_postgraphile_person;
-grant update, delete on table react_postgraphile.person to react_postgraphile_person;
+ALTER DEFAULT privileges REVOKE EXECUTE ON functions FROM public;
 
-grant execute on function react_postgraphile.person_full_name(react_postgraphile.person) to react_postgraphile_anonymous, react_postgraphile_person;
-grant execute on function react_postgraphile.authenticate(text, text) to react_postgraphile_anonymous, react_postgraphile_person;
-grant execute on function react_postgraphile.current_person() to react_postgraphile_anonymous, react_postgraphile_person;
-grant execute on function react_postgraphile.register_person(text, text, text, text) to react_postgraphile_anonymous;
+GRANT SELECT ON TABLE react_postgraphile.person TO react_postgraphile_anonymous, react_postgraphile_person;
 
-create policy update_person on react_postgraphile.person for update to react_postgraphile_person
-  using (id = current_setting('jwt.claims.person_id')::integer);
+GRANT UPDATE, DELETE ON TABLE react_postgraphile.person TO react_postgraphile_person;
 
-create policy delete_person on react_postgraphile.person for delete to react_postgraphile_person
-  using (id = current_setting('jwt.claims.person_id')::integer);
+GRANT EXECUTE ON FUNCTION react_postgraphile.person_full_name (react_postgraphile.person) TO react_postgraphile_anonymous, react_postgraphile_person;
 
-ALTER DATABASE react_postgraphile set jwt.claims.person_id to 0;
+GRANT EXECUTE ON FUNCTION react_postgraphile.authenticate (text, text) TO react_postgraphile_anonymous, react_postgraphile_person;
 
-create table react_postgraphile.pr_note (
-  pull_request     varchar(32) primary key,
-  content          text not null check (char_length(content) < 4800),
-  created_at       timestamp default now()
+GRANT EXECUTE ON FUNCTION react_postgraphile.current_person () TO react_postgraphile_anonymous, react_postgraphile_person;
+
+GRANT EXECUTE ON FUNCTION react_postgraphile.register_person (text, text, text, text) TO react_postgraphile_anonymous;
+
+CREATE POLICY update_person ON react_postgraphile.person FOR UPDATE TO react_postgraphile_person USING (id = current_setting('jwt.claims.person_id')::integer);
+
+CREATE POLICY delete_person ON react_postgraphile.person FOR DELETE TO react_postgraphile_person USING (id = current_setting('jwt.claims.person_id')::integer);
+
+ALTER DATABASE react_postgraphile SET jwt.claims.person_id TO 0;
+
+CREATE TABLE react_postgraphile.pr_note (
+  pull_request varchar(32) PRIMARY KEY,
+  content text NOT NULL CHECK (char_length(content) < 4800),
+  created_at timestamp DEFAULT now()
 );
 
-comment on table react_postgraphile.pr_note is 'Notes on a pull request.';
-comment on column react_postgraphile.pr_note.pull_request is 'The pr_notes key and pull request uuid in Github.';
-comment on column react_postgraphile.pr_note.content is 'The pr_notes content.';
-comment on column react_postgraphile.pr_note.created_at is 'The time this pr_note was created.';
+COMMENT ON TABLE react_postgraphile.pr_note IS 'Notes on a pull request.';
 
-grant select on table react_postgraphile.pr_note to react_postgraphile_anonymous, react_postgraphile_person;
-grant insert, update, delete on table react_postgraphile.pr_note to react_postgraphile_person;
+COMMENT ON COLUMN react_postgraphile.pr_note.pull_request IS 'The pr_notes key and pull request uuid in Github.';
 
-create policy all_pr_note on react_postgraphile.pr_note for all to react_postgraphile_person
-  using (id = current_setting('jwt.claims.person_id')::integer);
+COMMENT ON COLUMN react_postgraphile.pr_note.content IS 'The pr_notes content.';
 
-grant usage on schema react_postgraphile to react_postgraphile_anonymous, react_postgraphile_person;
-grant usage, select on all sequences in schema react_postgraphile to react_postgraphile_anonymous, react_postgraphile_person;
+COMMENT ON COLUMN react_postgraphile.pr_note.created_at IS 'The time this pr_note was created.';
+
+GRANT SELECT ON TABLE react_postgraphile.pr_note TO react_postgraphile_anonymous, react_postgraphile_person;
+
+GRANT INSERT, UPDATE, DELETE ON TABLE react_postgraphile.pr_note TO react_postgraphile_person;
+
+CREATE POLICY all_pr_note ON react_postgraphile.pr_note FOR ALL TO react_postgraphile_person USING (id = current_setting('jwt.claims.person_id')::integer);
+
+GRANT usage ON SCHEMA react_postgraphile TO react_postgraphile_anonymous, react_postgraphile_person;
+
+GRANT usage, SELECT ON ALL sequences IN SCHEMA react_postgraphile TO react_postgraphile_anonymous, react_postgraphile_person;
+

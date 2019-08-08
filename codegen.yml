@@ -1,0 +1,10 @@
+schema: http://localhost:5000/graphql
+generates:
+  src/schema.ts:
+    - add:
+        content:
+          - '/* eslint-disable */'
+          - '/*------------------'
+          - '  This file is generated and should not be edited'
+          - '--------------------*/'
+    - typescript
