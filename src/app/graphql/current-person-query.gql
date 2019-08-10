@@ -1,0 +1,7 @@
+query currentPerson {
+  currentPerson {
+    fullName
+    githubAuth
+    id
+  }
+}

@@ -7,15 +7,16 @@ const uri = 'http://localhost:5000/graphql'
 
 const httpLink = createHttpLink({ uri })
 
-const authLink = (token: any) =>
-  setContext((_, { headers }) => ({
+function authLink(token: any) {
+  return setContext((_, { headers }) => ({
     headers: {
       ...headers,
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     }
   }))
+}
 
-export default function(token?: any) {
+export default function(token?: string) {
   if (!token) {
     return new ApolloClient({
       cache: new InMemoryCache(),

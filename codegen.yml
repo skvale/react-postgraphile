@@ -1,6 +1,6 @@
 schema: http://localhost:5000/graphql
 generates:
-  src/schema.ts:
+  src/schema.d.ts:
     - add:
         content:
           - '/* eslint-disable */'

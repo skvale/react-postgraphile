@@ -1,22 +1,24 @@
 import React from 'react'
-import { gql } from 'apollo-boost'
+import { loader } from 'graphql.macro'
 import { useQuery } from '@apollo/react-hooks'
-import { Person } from '../schema'
+import { Query } from '../schema'
+import { LoginForm } from './login-form'
+import { Button } from '../components/button'
 
-export const QUERY = gql`
-  {
-    currentPerson {
-      fullName
-      githubAuth
-      id
-    }
+const currentPersonQuery = loader('./graphql/current-person-query.gql')
+
+type AppProps = {
+  updateToken: (jwtToken: string) => void
+}
+
+export const App: React.FC<AppProps> = ({ updateToken }) => {
+  const { loading, error, data: currentPersonData } = useQuery<{
+    currentPerson: Query['currentPerson']
+  }>(currentPersonQuery)
+
+  const onLogout = () => {
+    updateToken('')
   }
-`
-
-const App = () => {
-  const { loading, error, data } = useQuery<{ currentPerson: Person | null }>(
-    QUERY
-  )
 
   if (loading) {
     return <div>Loading</div>
@@ -26,13 +28,14 @@ const App = () => {
     return <div>Error: {error.message}</div>
   }
 
+  if (!currentPersonData || !currentPersonData.currentPerson) {
+    return <LoginForm updateToken={updateToken} />
+  }
+
   return (
     <div>
-      User:{' '}
-      {(data && data.currentPerson && data.currentPerson.firstName) ||
-        'No user'}
+      <div>Hello: {currentPersonData.currentPerson.fullName}</div>
+      <Button onClick={onLogout}>Log out</Button>
     </div>
   )
 }
-
-export default App
