@@ -15,7 +15,7 @@ import { Card } from '../components/card'
 const registerPersonMutation = loader('./graphql/register-person-mutation.gql')
 const authenticateMutation = loader('./graphql/authenticate-mutation.gql')
 
-type LoginFormProps = {
+export type LoginFormProps = {
   updateToken: (jwtToken: string) => void
 }
 
@@ -32,13 +32,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
     AuthenticateInput
   >(authenticateMutation)
 
-  const [register, { error: registerError }] = useMutation<
-    RegisterPersonPayload,
-    RegisterPersonInput
-  >(registerPersonMutation)
+  const [register] = useMutation<RegisterPersonPayload, RegisterPersonInput>(
+    registerPersonMutation
+  )
 
   useEffect(() => {
-    if (authenticateData) {
+    if (authenticateData && authenticateData.authenticate) {
       updateToken(authenticateData.authenticate.jwtToken || '')
     }
   }, [authenticateData, updateToken])
@@ -72,6 +71,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
     <div className='flex justify-center'>
       <Card className='px-12' title='Login'>
         <Form
+          data-testid='login-form'
           onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
             if (viewState === 'LOGIN') {
               onLogin()
@@ -82,12 +82,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
         >
           <div className='mb-6'>
             <Input
+              data-testid='login-email'
               id='email'
               label='Email'
               onChange={e => setEmail(e.target.value)}
               value={email}
             />
             <Input
+              data-testid='login-password'
               id='password'
               label='Password'
               type='password'
@@ -97,12 +99,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
             {viewState === 'REGISTER' && (
               <React.Fragment>
                 <Input
+                  data-testid='login-firstName'
                   id='firstName'
                   label='First Name'
                   onChange={e => setFirstName(e.target.value)}
                   value={firstName}
                 />
                 <Input
+                  data-testid='login-lastName'
                   id='lastName'
                   label='Last Name'
                   onChange={e => setLastName(e.target.value)}

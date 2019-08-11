@@ -7,7 +7,7 @@ import { Button } from '../components/button'
 
 const currentPersonQuery = loader('./graphql/current-person-query.gql')
 
-type AppProps = {
+export type AppProps = {
   updateToken: (jwtToken: string) => void
 }
 
