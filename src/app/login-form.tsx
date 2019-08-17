@@ -12,6 +12,7 @@ import {
 } from '../schema'
 import { Link } from '../components/link'
 import { Card } from '../components/card'
+import { error } from '../logger'
 const registerPersonMutation = loader('./graphql/register-person-mutation.gql')
 const authenticateMutation = loader('./graphql/authenticate-mutation.gql')
 
@@ -27,14 +28,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
   const [password, setPassword] = useState<string>('')
   const [firstName, setFirstName] = useState<string>('')
   const [lastName, setLastName] = useState<string>('')
-  const [login, { data: authenticateData }] = useMutation<
-    { authenticate: AuthenticatePayload },
-    AuthenticateInput
-  >(authenticateMutation)
-
-  const [register] = useMutation<RegisterPersonPayload, RegisterPersonInput>(
-    registerPersonMutation
+  const [
+    login,
+    { data: authenticateData, error: authenticateMutationError }
+  ] = useMutation<{ authenticate: AuthenticatePayload }, AuthenticateInput>(
+    authenticateMutation
   )
+
+  const [register, { error: registerPersonMutationError }] = useMutation<
+    RegisterPersonPayload,
+    RegisterPersonInput
+  >(registerPersonMutation)
 
   useEffect(() => {
     if (authenticateData && authenticateData.authenticate) {
@@ -56,22 +60,45 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
   }
 
   const onRegister = async () => {
-    await register({
-      variables: {
-        email,
-        firstName,
-        lastName,
-        password
-      }
-    })
-    onLogin()
+    try {
+      await register({
+        variables: {
+          email,
+          firstName,
+          lastName,
+          password
+        }
+      })
+      onLogin()
+    } catch (e) {
+      error(e.message)
+      console.error(e)
+    }
   }
+
+  const errorMessage = authenticateMutationError
+    ? authenticateMutationError.message
+    : registerPersonMutationError
+    ? registerPersonMutationError.message
+    : undefined
 
   return (
     <div className='flex justify-center'>
-      <Card className='px-12' title='Login'>
+      <Card title={viewState === 'LOGIN' ? 'Login' : 'Register'}>
+        <div className='float-right'>
+          {viewState === 'LOGIN' ? (
+            <Link color='gray' onClick={onSwapState}>
+              Register
+            </Link>
+          ) : (
+            <Link color='gray' onClick={onSwapState}>
+              Login
+            </Link>
+          )}
+        </div>
         <Form
           data-testid='login-form'
+          error={errorMessage}
           onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
             if (viewState === 'LOGIN') {
               onLogin()
@@ -121,15 +148,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
             </Button>
           </div>
         </Form>
-        {viewState === 'LOGIN' ? (
-          <Link color='gray' onClick={onSwapState}>
-            Register
-          </Link>
-        ) : (
-          <Link color='gray' onClick={onSwapState}>
-            Login
-          </Link>
-        )}
       </Card>
     </div>
   )

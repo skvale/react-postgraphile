@@ -1,15 +1,18 @@
 import React from 'react'
 import { cx } from 'emotion'
 
-interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {}
+interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
+  error?: string
+}
 
 export const Form: React.FC<FormProps> = ({
   className,
   children,
+  error,
   onSubmit,
   ...props
 }) => {
-  const formClasses = cx('bg-white', 'pt-6', 'pb-8', 'mb-4', className)
+  const formClasses = cx('bg-white', 'pt-6', 'pb-4', className)
   return (
     <form
       {...props}
@@ -22,6 +25,7 @@ export const Form: React.FC<FormProps> = ({
       }}
     >
       {children}
+      {error && <div>{error}</div>}
     </form>
   )
 }
