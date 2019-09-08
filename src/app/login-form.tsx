@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react'
+import { useLocation } from 'wouter'
+import { useQueryParam, BooleanParam } from 'use-query-params'
 import { loader } from 'graphql.macro'
 import { useMutation } from '@apollo/react-hooks'
 import { Button } from '../components/button'
@@ -8,7 +10,8 @@ import {
   AuthenticateInput,
   AuthenticatePayload,
   RegisterPersonPayload,
-  RegisterPersonInput
+  RegisterPersonInput,
+  Person
 } from '../schema'
 import { Link } from '../components/link'
 import { Card } from '../components/card'
@@ -17,13 +20,24 @@ const registerPersonMutation = loader('./graphql/register-person-mutation.gql')
 const authenticateMutation = loader('./graphql/authenticate-mutation.gql')
 
 export type LoginFormProps = {
+  currentPerson?: Person | null
   updateToken: (jwtToken: string) => void
 }
 
-type ViewState = 'LOGIN' | 'REGISTER'
+enum ViewState {
+  LOGIN = 'LOGIN',
+  REGISTER = 'REGISTER'
+}
 
-export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
-  const [viewState, setViewState] = useState<ViewState>('LOGIN')
+export const LoginForm: React.FC<LoginFormProps> = ({
+  currentPerson,
+  updateToken
+}) => {
+  const [, setLocation] = useLocation()
+  const [registerParam] = useQueryParam('register', BooleanParam)
+  const [viewState, setViewState] = useState<ViewState>(
+    registerParam ? ViewState.REGISTER : ViewState.LOGIN
+  )
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [firstName, setFirstName] = useState<string>('')
@@ -43,11 +57,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
   useEffect(() => {
     if (authenticateData && authenticateData.authenticate) {
       updateToken(authenticateData.authenticate.jwtToken || '')
+      setLocation('/')
     }
-  }, [authenticateData, updateToken])
+  }, [authenticateData, setLocation, updateToken])
 
   const onSwapState = () => {
-    setViewState(viewState === 'LOGIN' ? 'REGISTER' : 'LOGIN')
+    setViewState(
+      viewState === ViewState.LOGIN ? ViewState.REGISTER : ViewState.LOGIN
+    )
   }
 
   const onLogin = () => {
@@ -84,9 +101,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
 
   return (
     <div className='flex justify-center'>
-      <Card title={viewState === 'LOGIN' ? 'Login' : 'Register'}>
+      {currentPerson && (
+        <div>Currently logged in as: {currentPerson.fullName}</div>
+      )}
+      <Card
+        className='bg-white'
+        title={viewState === ViewState.LOGIN ? 'Login' : 'Register'}
+      >
         <div className='float-right'>
-          {viewState === 'LOGIN' ? (
+          {viewState === ViewState.LOGIN ? (
             <Link color='gray' onClick={onSwapState}>
               Register
             </Link>
@@ -100,7 +123,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
           data-testid='login-form'
           error={errorMessage}
           onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
-            if (viewState === 'LOGIN') {
+            if (viewState === ViewState.LOGIN) {
               onLogin()
             } else {
               onRegister()
@@ -123,7 +146,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
               onChange={e => setPassword(e.target.value)}
               value={password}
             />
-            {viewState === 'REGISTER' && (
+            {viewState === ViewState.REGISTER && (
               <React.Fragment>
                 <Input
                   data-testid='login-firstName'
@@ -144,7 +167,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ updateToken }) => {
           </div>
           <div className='flex items-center justify-between'>
             <Button type='submit'>
-              {viewState === 'LOGIN' ? 'Sign In' : 'Register'}
+              {viewState === ViewState.LOGIN ? 'Sign In' : 'Register'}
             </Button>
           </div>
         </Form>

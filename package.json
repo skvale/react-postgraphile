@@ -14,7 +14,10 @@
     "graphql.macro": "^1.4.2",
     "js-cookie": "^2.2.1",
     "react": "^16.9.0",
-    "react-dom": "^16.9.0"
+    "react-dom": "^16.9.0",
+    "roughjs": "^3.1.0",
+    "use-query-params": "^0.3.3",
+    "wouter": "^2.2.0"
   },
   "scripts": {
     "tailwind": "tailwind build ./src/index.tailwind.css -c ./tailwind.config.js -o ./src/index.css",
@@ -37,6 +40,7 @@
     "@types/node": "^12.7.1",
     "@types/react": "^16.8.25",
     "@types/react-dom": "^16.8.5",
+    "@types/wouter": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^1.13.0",
     "@typescript-eslint/parser": "^1.13.0",
     "eslint-config-prettier": "^6.0.0",

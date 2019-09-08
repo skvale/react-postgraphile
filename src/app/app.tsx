@@ -2,8 +2,8 @@ import React from 'react'
 import { loader } from 'graphql.macro'
 import { useQuery } from '@apollo/react-hooks'
 import { Query } from '../schema'
-import { LoginForm } from './login-form'
-import { Button } from '../components/button'
+import { Routing } from './routing'
+import { Nav } from './nav'
 
 const currentPersonQuery = loader('./graphql/current-person-query.gql')
 
@@ -15,27 +15,20 @@ export const App: React.FC<AppProps> = ({ updateToken }) => {
   const { loading, error, data: currentPersonData } = useQuery<{
     currentPerson: Query['currentPerson']
   }>(currentPersonQuery)
-
-  const onLogout = () => {
-    updateToken('')
-  }
-
-  if (loading) {
-    return <div>Loading</div>
-  }
-
+  console.log({ error })
   if (error) {
     return <div>Error: {error.message}</div>
   }
-
-  if (!currentPersonData || !currentPersonData.currentPerson) {
-    return <LoginForm updateToken={updateToken} />
-  }
-
+  const currentPerson = currentPersonData && currentPersonData.currentPerson
+  console.log(currentPerson)
   return (
-    <div>
-      <div>Hello: {currentPersonData.currentPerson.fullName}</div>
-      <Button onClick={onLogout}>Log out</Button>
+    <div className='bg-gray-100 font-sans w-full min-h-screen m-0'>
+      <Nav currentPerson={currentPerson} />
+      <Routing
+        currentPerson={currentPerson}
+        loading={loading}
+        updateToken={updateToken}
+      />
     </div>
   )
 }
