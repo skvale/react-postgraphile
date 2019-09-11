@@ -1,5 +1,4 @@
 import React from 'react'
-import { useLocation } from 'wouter'
 import { useMachine } from '@xstate/react'
 import { useQueryParam, BooleanParam } from 'use-query-params'
 import { loader } from 'graphql.macro'
@@ -16,7 +15,11 @@ import {
 } from '../schema'
 import { Link } from '../components/link'
 import { Card } from '../components/card'
-import { loginMachine, registerMachine } from '../machines/login-machine'
+import {
+  loginMachine,
+  registerMachine,
+  LoginContext
+} from '../machines/login-machine'
 const registerPersonMutation = loader('./graphql/register-person-mutation.gql')
 const authenticateMutation = loader('./graphql/authenticate-mutation.gql')
 
@@ -49,7 +52,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     registerParam ? registerMachine : loginMachine,
     {
       services: {
-        onLogin: async ({ email, password }: any, event: any) => {
+        onLogin: async ({ email, password }: LoginContext) => {
           const result = await login({
             variables: {
               email,
@@ -63,12 +66,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             result.data.authenticate.jwtToken
           ) {
             updateToken(result.data.authenticate.jwtToken)
-            setLocation('/')
+            return result.data.authenticate.jwtToken
           } else {
+            console.log('Error')
             throw Error('something happened')
           }
         },
-        onRegister: async ({ email, password, firstName, lastName }: any, event: any) => {
+        onRegister: async ({
+          email,
+          password,
+          firstName,
+          lastName
+        }: LoginContext) => {
           return register({
             variables: {
               email,
@@ -81,22 +90,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       }
     }
   ) as any
-  const [, setLocation] = useLocation()
-  const { firstName, email, lastName, password } = current.context
+
+  const { error, firstName, email, lastName, password } = current.context
 
   if (current.matches('success')) {
-    return <div>success</div>
-  }
-
-  if (current.matches('failure')) {
-    return <div>failed</div>
+    return null
   }
 
   const onSwapState = () => {
     send('TOGGLE')
   }
-
-  const errorMessage = ''
 
   return (
     <div className='flex justify-center'>
@@ -120,7 +123,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         </div>
         <Form
           data-testid='login-form'
-          error={errorMessage}
+          error={error}
           onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
             send({
               type: 'SUBMIT'

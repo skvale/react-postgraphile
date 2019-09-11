@@ -1,10 +1,12 @@
-import { Machine, assign, send } from 'xstate'
+import { Machine, assign } from 'xstate'
 
-interface LoginContext {
+export interface LoginContext {
   email: string
-  password: string
+  error: string
   firstName: string
+  jwtToken: string
   lastName: string
+  password: string
 }
 
 const emailAndPassword = {
@@ -25,9 +27,11 @@ export const baseMachine = {
   initial: 'login',
   context: {
     email: '',
-    password: '',
+    error: '',
     firstName: '',
-    lastName: ''
+    jwtToken: '',
+    lastName: '',
+    password: ''
   },
   states: {
     login: {
@@ -40,15 +44,37 @@ export const baseMachine = {
     loading: {
       invoke: {
         src: 'onLogin',
-        onDone: 'success',
-        onError: 'failure'
+        onDone: {
+          target: 'success',
+          actions: assign({
+            jwtToken: (_context: LoginContext, event: any) => {
+              return event.data
+            }
+          })
+        },
+        onError: {
+          target: 'login',
+          actions: assign({
+            error: (_context: LoginContext, event: any) => {
+              return event.data.message
+            }
+          })
+        }
       }
     },
     loading_register: {
       invoke: {
         src: 'onRegister',
         onDone: 'loading',
-        onError: 'failure'
+        onError: {
+          target: 'login',
+          actions: assign({
+            error: (_context: LoginContext, event: any) => {
+              console.log(event)
+              return event.data.message
+            }
+          })
+        }
       }
     },
     register: {
@@ -58,26 +84,27 @@ export const baseMachine = {
         ...emailAndPassword,
         FIRST_NAME: {
           actions: assign({
-            firstName: (_: any, e: any) => e.value
+            firstName: (_context: any, e: any) => e.value
           })
         },
         LAST_NAME: {
           actions: assign({
-            lastName: (_: any, e: any) => e.value
+            lastName: (_context: any, e: any) => e.value
           })
         }
       }
     },
-    success: {},
-    failure: {}
+    success: {
+      entry: (c: any, e: any) => {
+        window.location.href = '/'
+      }
+    }
   }
 }
 
 export const loginMachine = Machine<LoginContext>(baseMachine)
 
-export const registerMachine = Machine<LoginContext>(
-  {
-    ...baseMachine,
-    initial: 'register'
-  }
-)
+export const registerMachine = Machine<LoginContext>({
+  ...baseMachine,
+  initial: 'register'
+})
