@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { useLocation } from 'wouter'
+import { useMachine } from '@xstate/react'
 import { useQueryParam, BooleanParam } from 'use-query-params'
 import { loader } from 'graphql.macro'
 import { useMutation } from '@apollo/react-hooks'
@@ -15,7 +16,7 @@ import {
 } from '../schema'
 import { Link } from '../components/link'
 import { Card } from '../components/card'
-import { error } from '../logger'
+import { loginMachine, registerMachine } from '../machines/login-machine'
 const registerPersonMutation = loader('./graphql/register-person-mutation.gql')
 const authenticateMutation = loader('./graphql/authenticate-mutation.gql')
 
@@ -25,79 +26,77 @@ export type LoginFormProps = {
 }
 
 enum ViewState {
-  LOGIN = 'LOGIN',
-  REGISTER = 'REGISTER'
+  LOGIN = 'login',
+  REGISTER = 'register'
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   currentPerson,
   updateToken
 }) => {
-  const [, setLocation] = useLocation()
   const [registerParam] = useQueryParam('register', BooleanParam)
-  const [viewState, setViewState] = useState<ViewState>(
-    registerParam ? ViewState.REGISTER : ViewState.LOGIN
-  )
-  const [email, setEmail] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
-  const [firstName, setFirstName] = useState<string>('')
-  const [lastName, setLastName] = useState<string>('')
-  const [
-    login,
-    { data: authenticateData, error: authenticateMutationError }
-  ] = useMutation<{ authenticate: AuthenticatePayload }, AuthenticateInput>(
-    authenticateMutation
-  )
+  const [login, { error: authenticateMutationError }] = useMutation<
+    { authenticate: AuthenticatePayload },
+    AuthenticateInput
+  >(authenticateMutation)
 
   const [register, { error: registerPersonMutationError }] = useMutation<
     RegisterPersonPayload,
     RegisterPersonInput
   >(registerPersonMutation)
 
-  useEffect(() => {
-    if (authenticateData && authenticateData.authenticate) {
-      updateToken(authenticateData.authenticate.jwtToken || '')
-      setLocation('/')
+  const [current, send] = useMachine(
+    registerParam ? registerMachine : loginMachine,
+    {
+      services: {
+        onLogin: async ({ email, password }: any, event: any) => {
+          const result = await login({
+            variables: {
+              email,
+              password
+            }
+          })
+          if (
+            result &&
+            result.data &&
+            result.data.authenticate &&
+            result.data.authenticate.jwtToken
+          ) {
+            updateToken(result.data.authenticate.jwtToken)
+            setLocation('/')
+          } else {
+            throw Error('something happened')
+          }
+        },
+        onRegister: async ({ email, password, firstName, lastName }: any, event: any) => {
+          return register({
+            variables: {
+              email,
+              firstName,
+              lastName,
+              password
+            }
+          })
+        }
+      }
     }
-  }, [authenticateData, setLocation, updateToken])
+  ) as any
+  const [, setLocation] = useLocation()
+  const { firstName, email, lastName, password } = current.context
+
+  if (current.matches('success')) {
+    return <div>success</div>
+  }
+
+  if (current.matches('failure')) {
+    return <div>failed</div>
+  }
 
   const onSwapState = () => {
-    setViewState(
-      viewState === ViewState.LOGIN ? ViewState.REGISTER : ViewState.LOGIN
-    )
+    send('TOGGLE')
   }
 
-  const onLogin = () => {
-    login({
-      variables: {
-        email,
-        password
-      }
-    })
-  }
-
-  const onRegister = async () => {
-    try {
-      await register({
-        variables: {
-          email,
-          firstName,
-          lastName,
-          password
-        }
-      })
-      onLogin()
-    } catch (e) {
-      error(e.message)
-      console.error(e)
-    }
-  }
-
-  const errorMessage = authenticateMutationError
-    ? authenticateMutationError.message
-    : registerPersonMutationError
-    ? registerPersonMutationError.message
-    : undefined
+  const errorMessage = ''
 
   return (
     <div className='flex justify-center'>
@@ -106,10 +105,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       )}
       <Card
         className='bg-white'
-        title={viewState === ViewState.LOGIN ? 'Login' : 'Register'}
+        title={current.matches(ViewState.LOGIN) ? 'Login' : 'Register'}
       >
         <div className='float-right'>
-          {viewState === ViewState.LOGIN ? (
+          {current.matches(ViewState.LOGIN) ? (
             <Link color='gray' onClick={onSwapState}>
               Register
             </Link>
@@ -123,11 +122,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           data-testid='login-form'
           error={errorMessage}
           onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
-            if (viewState === ViewState.LOGIN) {
-              onLogin()
-            } else {
-              onRegister()
-            }
+            send({
+              type: 'SUBMIT'
+            })
           }}
         >
           <div className='mb-6'>
@@ -135,7 +132,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               data-testid='login-email'
               id='email'
               label='Email'
-              onChange={e => setEmail(e.target.value)}
+              onChange={e => send({ type: 'EMAIL', value: e.target.value })}
               value={email}
             />
             <Input
@@ -143,23 +140,27 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               id='password'
               label='Password'
               type='password'
-              onChange={e => setPassword(e.target.value)}
+              onChange={e => send({ type: 'PASSWORD', value: e.target.value })}
               value={password}
             />
-            {viewState === ViewState.REGISTER && (
+            {current.matches(ViewState.REGISTER) && (
               <React.Fragment>
                 <Input
                   data-testid='login-firstName'
                   id='firstName'
                   label='First Name'
-                  onChange={e => setFirstName(e.target.value)}
+                  onChange={e =>
+                    send({ type: 'FIRST_NAME', value: e.target.value })
+                  }
                   value={firstName}
                 />
                 <Input
                   data-testid='login-lastName'
                   id='lastName'
                   label='Last Name'
-                  onChange={e => setLastName(e.target.value)}
+                  onChange={e =>
+                    send({ type: 'LAST_NAME', value: e.target.value })
+                  }
                   value={lastName}
                 />
               </React.Fragment>
@@ -167,7 +168,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           </div>
           <div className='flex items-center justify-between'>
             <Button type='submit'>
-              {viewState === ViewState.LOGIN ? 'Sign In' : 'Register'}
+              {current.matches(ViewState.LOGIN) ? 'Sign In' : 'Register'}
             </Button>
           </div>
         </Form>
