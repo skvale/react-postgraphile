@@ -22,11 +22,10 @@ test('renders', async () => {
 })
 
 test('click login', async () => {
-  const login = jest.fn()
+  const login = jest.fn(() => Promise.resolve({ data: { authenticate: { jwtToken: 'mock-jwt-token' } } }))
   // @ts-ignore
   apolloHooks.useMutation.mockImplementation(() => [
-    login,
-    { data: { authenticate: { jwtToken: 'mock-jwt-token' } } }
+    login
   ])
   const { findByTestId } = render(<LoginForm {...defaultProps} />)
   const email = await findByTestId('login-email')
@@ -51,13 +50,13 @@ test('click register', async () => {
   const register = jest.fn()
   // @ts-ignore
   apolloHooks.useMutation.mockImplementation(() => [register, {}])
-  const { findByTestId, findByText } = render(<LoginForm {...defaultProps} />)
-  const registerLink = await findByText('Register')
+  const { findByTestId } = render(<LoginForm {...defaultProps} />)
+  const registerLink = await findByTestId('toggle-link')
   fireEvent.click(registerLink)
   const email = await findByTestId('login-email')
   const password = await findByTestId('login-password')
-  const firstName = await findByTestId('login-firstName')
-  const lastName = await findByTestId('login-lastName')
+  const firstName = await findByTestId('login-first-name')
+  const lastName = await findByTestId('login-last-name')
   fireEvent.change(email, { target: { value: 'foo@bar.com' } })
   fireEvent.change(password, { target: { value: 'password' } })
   fireEvent.change(firstName, { target: { value: 'First' } })

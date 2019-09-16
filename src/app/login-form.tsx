@@ -38,15 +38,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   updateToken
 }) => {
   const [registerParam] = useQueryParam('register', BooleanParam)
-  const [login, { error: authenticateMutationError }] = useMutation<
+  const [login] = useMutation<
     { authenticate: AuthenticatePayload },
     AuthenticateInput
   >(authenticateMutation)
 
-  const [register, { error: registerPersonMutationError }] = useMutation<
-    RegisterPersonPayload,
-    RegisterPersonInput
-  >(registerPersonMutation)
+  const [register] = useMutation<RegisterPersonPayload, RegisterPersonInput>(
+    registerPersonMutation
+  )
 
   const [current, send] = useMachine(
     registerParam ? registerMachine : loginMachine,
@@ -59,12 +58,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               password
             }
           })
+          console.log('Here', result)
           if (
             result &&
             result.data &&
             result.data.authenticate &&
             result.data.authenticate.jwtToken
           ) {
+            console.log('calling', result.data.authenticate.jwtToken)
             updateToken(result.data.authenticate.jwtToken)
             return result.data.authenticate.jwtToken
           } else {
@@ -112,11 +113,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       >
         <div className='float-right'>
           {current.matches(ViewState.LOGIN) ? (
-            <Link color='gray' onClick={onSwapState}>
+            <Link data-testid='toggle-link' color='gray' onClick={onSwapState}>
               Register
             </Link>
           ) : (
-            <Link color='gray' onClick={onSwapState}>
+            <Link data-testid='toggle-link' color='gray' onClick={onSwapState}>
               Login
             </Link>
           )}
@@ -149,7 +150,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             {current.matches(ViewState.REGISTER) && (
               <React.Fragment>
                 <Input
-                  data-testid='login-firstName'
+                  data-testid='login-first-name'
                   id='firstName'
                   label='First Name'
                   onChange={e =>
@@ -158,7 +159,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   value={firstName}
                 />
                 <Input
-                  data-testid='login-lastName'
+                  data-testid='login-last-name'
                   id='lastName'
                   label='Last Name'
                   onChange={e =>
@@ -170,7 +171,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             )}
           </div>
           <div className='flex items-center justify-between'>
-            <Button type='submit'>
+            <Button data-testid='login-submit-button' type='submit'>
               {current.matches(ViewState.LOGIN) ? 'Sign In' : 'Register'}
             </Button>
           </div>

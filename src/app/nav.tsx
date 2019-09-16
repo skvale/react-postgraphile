@@ -45,6 +45,7 @@ export const Nav: React.FC<NavProps> = ({ currentPerson }) => {
             ) : (
               <React.Fragment>
                 <a
+                  data-testid='signin-link'
                   href='/login'
                   className='text-gray-800 text-sm font-semibold hover:text-purple-600 mr-4'
                 >
@@ -96,6 +97,7 @@ export const Nav: React.FC<NavProps> = ({ currentPerson }) => {
               ) : (
                 <React.Fragment>
                   <a
+                    data-testid='signin-link'
                     href='/login'
                     className='text-gray-800 text-sm font-semibold hover:text-purple-600 mr-4'
                   >

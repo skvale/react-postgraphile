@@ -15,6 +15,12 @@ jest.mock('../login-form', () => ({
   LoginForm: (props: LoginFormProps) => `LoginForm ${JSON.stringify(props)}`
 }))
 
+jest.mock('roughjs/dist/rough.umd', () => ({
+  svg: () => ({
+    rectangle: () => document.createElement('svg')
+  })
+}))
+
 let defaultProps: AppProps
 beforeEach(() => {
   defaultProps = {

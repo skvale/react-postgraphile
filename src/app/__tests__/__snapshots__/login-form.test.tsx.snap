@@ -26,7 +26,7 @@ exports[`renders 1`] = `
     class="flex justify-center"
   >
     <div
-      class="max-w-sm rounded overflow-hidden shadow-lg px-12"
+      class="max-w-sm rounded overflow-hidden shadow-lg bg-white"
     >
       <div
         class="p-6"
@@ -39,8 +39,19 @@ exports[`renders 1`] = `
         <div
           class="text-gray-700 text-base"
         >
+          <div
+            class="float-right"
+          >
+            <a
+              class="cursor-pointer font-bold inline-block align-baseline text-sm text-blue-700 hover:text-blue-900"
+              color="gray"
+              data-testid="toggle-link"
+            >
+              Register
+            </a>
+          </div>
           <form
-            class="bg-white pt-6 pb-8 mb-4"
+            class="bg-white pt-6 pb-4"
             data-testid="login-form"
           >
             <div
@@ -85,23 +96,15 @@ exports[`renders 1`] = `
             >
               <button
                 class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                data-testid="login-submit-button"
                 type="submit"
               >
                 Sign In
               </button>
             </div>
           </form>
-          <a
-            class="cursor-pointer font-bold inline-block align-baseline text-sm text-blue-700 hover:text-blue-900"
-            color="gray"
-          >
-            Register
-          </a>
         </div>
       </div>
-      <div
-        class="px-6 py-4"
-      />
     </div>
   </div>
 </DocumentFragment>
@@ -113,7 +116,7 @@ exports[`renders registration view 1`] = `
     class="flex justify-center"
   >
     <div
-      class="max-w-sm rounded overflow-hidden shadow-lg px-12"
+      class="max-w-sm rounded overflow-hidden shadow-lg bg-white"
     >
       <div
         class="p-6"
@@ -121,13 +124,24 @@ exports[`renders registration view 1`] = `
         <div
           class="font-bold text-xl mb-2"
         >
-          Login
+          Register
         </div>
         <div
           class="text-gray-700 text-base"
         >
+          <div
+            class="float-right"
+          >
+            <a
+              class="cursor-pointer font-bold inline-block align-baseline text-sm text-blue-700 hover:text-blue-900"
+              color="gray"
+              data-testid="toggle-link"
+            >
+              Login
+            </a>
+          </div>
           <form
-            class="bg-white pt-6 pb-8 mb-4"
+            class="bg-white pt-6 pb-4"
             data-testid="login-form"
           >
             <div
@@ -177,7 +191,7 @@ exports[`renders registration view 1`] = `
                 </label>
                 <input
                   class="appearance-none border leading-tight py-2 px-3 rounded shadow text-gray-700 w-full focus:outline-none focus:shadow-outline"
-                  data-testid="login-firstName"
+                  data-testid="login-first-name"
                   id="firstName"
                   value=""
                 />
@@ -193,7 +207,7 @@ exports[`renders registration view 1`] = `
                 </label>
                 <input
                   class="appearance-none border leading-tight py-2 px-3 rounded shadow text-gray-700 w-full focus:outline-none focus:shadow-outline"
-                  data-testid="login-lastName"
+                  data-testid="login-last-name"
                   id="lastName"
                   value=""
                 />
@@ -204,23 +218,15 @@ exports[`renders registration view 1`] = `
             >
               <button
                 class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                data-testid="login-submit-button"
                 type="submit"
               >
                 Register
               </button>
             </div>
           </form>
-          <a
-            class="cursor-pointer font-bold inline-block align-baseline text-sm text-blue-700 hover:text-blue-900"
-            color="gray"
-          >
-            Login
-          </a>
         </div>
       </div>
-      <div
-        class="px-6 py-4"
-      />
     </div>
   </div>
 </DocumentFragment>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { useRoute } from 'wouter'
+import { useRoutes } from 'hookrouter'
 
 import { LoginForm } from './login-form'
 import { Person } from '../schema'
@@ -11,18 +11,23 @@ export type RoutingProps = {
   updateToken: (jwtToken: string) => void
 }
 
+const routes = {
+  '/login': () => 'login',
+  '/sign-out': () => 'signOut'
+}
+
 export const Routing: React.FC<RoutingProps> = ({
   currentPerson,
   loading,
   updateToken
 }) => {
-  const [loginRoute] = useRoute('/login')
-  const [signOutRoute] = useRoute('/sign-out')
-  if (loginRoute) {
+  const routeName = useRoutes(routes)
+
+  if (routeName === 'login') {
     return <LoginForm currentPerson={currentPerson} updateToken={updateToken} />
   }
 
-  if (signOutRoute) {
+  if (routeName === 'signOut') {
     return <SignOut updateToken={updateToken} />
   }
 

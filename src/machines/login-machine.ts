@@ -56,7 +56,10 @@ export const baseMachine = {
           target: 'login',
           actions: assign({
             error: (_context: LoginContext, event: any) => {
-              return event.data.message
+              if (event && event.data) {
+                return event.data.message
+              }
+              return 'unknown error'
             }
           })
         }
@@ -70,8 +73,10 @@ export const baseMachine = {
           target: 'login',
           actions: assign({
             error: (_context: LoginContext, event: any) => {
-              console.log(event)
-              return event.data.message
+              if (event && event.data) {
+                return event.data.message
+              }
+              return 'unknown error'
             }
           })
         }
@@ -95,7 +100,7 @@ export const baseMachine = {
       }
     },
     success: {
-      entry: (c: any, e: any) => {
+      entry: () => {
         window.location.href = '/'
       }
     }
