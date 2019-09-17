@@ -2,78 +2,61 @@ import '@testing-library/jest-dom/extend-expect'
 
 import React from 'react'
 import { render } from '@testing-library/react'
-import * as apolloHooks from '@apollo/react-hooks'
-import { App, AppProps } from '../app'
+import { App } from '../app'
 import { LoginFormProps } from '../login-form'
+import rough from 'roughjs/dist/rough.umd'
+import * as graph from '../../clients/postgraphile'
 
-jest.mock('@apollo/react-hooks', () => ({
-  useQuery: jest.fn(() => ({})),
-  useMutation: jest.fn(() => [jest.fn(), {}])
-}))
+rough.svg = jest.fn(() => ({rectangle: () => document.createElement('svg')}))
+
+function flushPromises() {
+  return new Promise(resolve => setImmediate(resolve))
+}
 
 jest.mock('../login-form', () => ({
   LoginForm: (props: LoginFormProps) => `LoginForm ${JSON.stringify(props)}`
 }))
 
-jest.mock('roughjs/dist/rough.umd', () => ({
-  svg: () => ({
-    rectangle: () => document.createElement('svg')
-  })
-}))
-
-let defaultProps: AppProps
-beforeEach(() => {
-  defaultProps = {
-    updateToken: jest.fn()
-  }
-})
-
-test('renders without user', () => {
+test('renders without user', async () => {
+  const m = jest.fn(() => Promise.resolve({currentPerson: null}))
+  const f = jest.fn(() => m)
   // @ts-ignore
-  apolloHooks.useQuery.mockImplementationOnce(() => ({
-    data: {
-      currentPerson: null
-    }
-  }))
-  const { asFragment } = render(<App {...defaultProps} />)
+  graph.createClient = () => f
+  const { asFragment } = render(<App />)
+  await flushPromises()
 
-  expect(
-    // @ts-ignore
-    apolloHooks.useQuery.mock.calls[0][0].loc.source.body
-  ).toMatchSnapshot()
+  expect(m).toHaveBeenCalled()
+  expect(f.mock.calls[0]).toMatchSnapshot()
   expect(asFragment()).toMatchSnapshot()
 })
 
-test('renders with user', () => {
+test('renders with user', async () => {
+  const m = jest.fn(() => Promise.resolve({currentPerson: {fullName: 'Bobby'}}))
+  const f = jest.fn(() => m)
   // @ts-ignore
-  apolloHooks.useQuery.mockImplementationOnce(() => ({
-    data: {
-      currentPerson: {
-        fullName: 'Bobby'
-      }
-    }
-  }))
-  const { asFragment } = render(<App {...defaultProps} />)
-
+  graph.createClient = () => f
+  const { asFragment } = render(<App />)
+  await flushPromises()
   expect(asFragment()).toMatchSnapshot()
 })
 
 test('renders loading', () => {
+  const m = jest.fn(() => Promise.resolve({currentPerson: {fullName: 'Bobby'}}))
+  const f = jest.fn(() => m)
   // @ts-ignore
-  apolloHooks.useQuery.mockImplementationOnce(() => ({
-    loading: true
-  }))
-  const { asFragment } = render(<App {...defaultProps} />)
-
+  graph.createClient = () => f
+  const { asFragment } = render(<App />)
   expect(asFragment()).toMatchSnapshot()
 })
 
-test('renders error', () => {
+test('renders error', async () => {
+  const m = jest.fn(() => Promise.reject(Error('bad stuff')))
+  const f = jest.fn(() => m)
   // @ts-ignore
-  apolloHooks.useQuery.mockImplementationOnce(() => ({
-    error: new Error('bad stuff')
-  }))
-  const { asFragment } = render(<App {...defaultProps} />)
+  graph.createClient = () => f
+  const { asFragment, rerender } = render(<App />)
+  await flushPromises()
+  rerender(<App />)
 
   expect(asFragment()).toMatchSnapshot()
 })

@@ -1,18 +1,12 @@
 import React from 'react'
 import { useMachine } from '@xstate/react'
+import { print } from 'graphql'
 import { useQueryParam, BooleanParam } from 'use-query-params'
 import { loader } from 'graphql.macro'
-import { useMutation } from '@apollo/react-hooks'
 import { Button } from '../components/button'
 import { Input } from '../components/input'
 import { Form } from '../components/form'
-import {
-  AuthenticateInput,
-  AuthenticatePayload,
-  RegisterPersonPayload,
-  RegisterPersonInput,
-  Person
-} from '../schema'
+import { Person } from '../schema'
 import { Link } from '../components/link'
 import { Card } from '../components/card'
 import {
@@ -20,11 +14,17 @@ import {
   registerMachine,
   LoginContext
 } from '../machines/login-machine'
+import {createClient} from '../clients/postgraphile'
+
 const registerPersonMutation = loader('./graphql/register-person-mutation.gql')
 const authenticateMutation = loader('./graphql/authenticate-mutation.gql')
 
+const login = (...args: any[]) => createClient()(print(authenticateMutation))(...args)
+const register = (...args: any[]) =>
+  createClient()(print(registerPersonMutation))(...args)
+
 export type LoginFormProps = {
-  currentPerson?: Person | null
+  currentUser?: Person | null
   updateToken: (jwtToken: string) => void
 }
 
@@ -34,18 +34,10 @@ enum ViewState {
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
-  currentPerson,
+  currentUser,
   updateToken
 }) => {
   const [registerParam] = useQueryParam('register', BooleanParam)
-  const [login] = useMutation<
-    { authenticate: AuthenticatePayload },
-    AuthenticateInput
-  >(authenticateMutation)
-
-  const [register] = useMutation<RegisterPersonPayload, RegisterPersonInput>(
-    registerPersonMutation
-  )
 
   const [current, send] = useMachine(
     registerParam ? registerMachine : loginMachine,
@@ -53,23 +45,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       services: {
         onLogin: async ({ email, password }: LoginContext) => {
           const result = await login({
-            variables: {
-              email,
-              password
-            }
+            email,
+            password
           })
-          console.log('Here', result)
-          if (
-            result &&
-            result.data &&
-            result.data.authenticate &&
-            result.data.authenticate.jwtToken
-          ) {
-            console.log('calling', result.data.authenticate.jwtToken)
-            updateToken(result.data.authenticate.jwtToken)
-            return result.data.authenticate.jwtToken
+          if (result && result.authenticate && result.authenticate.jwtToken) {
+            console.log('calling')
+            updateToken(result.authenticate.jwtToken)
+            return result.authenticate.jwtToken
           } else {
-            console.log('Error')
             throw Error('something happened')
           }
         },
@@ -80,12 +63,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           lastName
         }: LoginContext) => {
           return register({
-            variables: {
-              email,
-              firstName,
-              lastName,
-              password
-            }
+            email,
+            firstName,
+            lastName,
+            password
           })
         }
       }
@@ -104,9 +85,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   return (
     <div className='flex justify-center'>
-      {currentPerson && (
-        <div>Currently logged in as: {currentPerson.fullName}</div>
-      )}
+      {currentUser && <div>Currently logged in as: {currentUser.fullName}</div>}
       <Card
         className='bg-white'
         title={current.matches(ViewState.LOGIN) ? 'Login' : 'Register'}

@@ -3,10 +3,10 @@ import rough from 'roughjs/dist/rough.umd'
 import { Person } from '../schema'
 
 export type NavProps = {
-  currentPerson?: Person | null
+  currentUser?: Person | null
 }
 
-export const Nav: React.FC<NavProps> = ({ currentPerson }) => {
+export const Nav: React.FC<NavProps> = ({ currentUser }) => {
   const [showPullout, setShowPullout] = useState(false)
   const svgEl = useRef<SVGSVGElement>(null)
   useEffect(() => {
@@ -35,7 +35,7 @@ export const Nav: React.FC<NavProps> = ({ currentPerson }) => {
             >
               Products
             </a>
-            {currentPerson ? (
+            {currentUser ? (
               <a
                 href='/sign-out'
                 className='bg-gray-900 text-white text-sm font-semibold border px-4 py-2 rounded-lg hover:text-gray-200 hover:border-blue-600'
@@ -87,7 +87,7 @@ export const Nav: React.FC<NavProps> = ({ currentPerson }) => {
               Products
             </a>
             <div className='flex justify-between items-center border-t-2 pt-2'>
-              {currentPerson ? (
+              {currentUser ? (
                 <a
                   href='/sign-out'
                   className='text-gray-800 text-sm font-semibold border px-4 py-1 rounded-lg hover:text-purple-600 hover:border-purple-600'

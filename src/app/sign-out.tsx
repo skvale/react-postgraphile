@@ -9,7 +9,7 @@ export const SignOut: React.FC<SignOutProps> = ({ updateToken }) => {
   useEffect(() => {
     updateToken('')
     navigate('/')
-  })
+  }, [updateToken])
 
   return <div></div>
 }

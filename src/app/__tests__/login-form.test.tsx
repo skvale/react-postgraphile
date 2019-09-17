@@ -2,12 +2,12 @@ import '@testing-library/jest-dom/extend-expect'
 
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react'
-import * as apolloHooks from '@apollo/react-hooks'
 import { LoginForm, LoginFormProps } from '../login-form'
+import * as graph from '../../clients/postgraphile'
 
-jest.mock('@apollo/react-hooks', () => ({
-  useMutation: jest.fn(() => [jest.fn(), {}])
-}))
+function flushPromises() {
+  return new Promise(resolve => setImmediate(resolve))
+}
 
 let defaultProps: LoginFormProps
 beforeEach(() => {
@@ -22,11 +22,11 @@ test('renders', async () => {
 })
 
 test('click login', async () => {
-  const login = jest.fn(() => Promise.resolve({ data: { authenticate: { jwtToken: 'mock-jwt-token' } } }))
+  const login = jest.fn(() =>
+    Promise.resolve({ authenticate: { jwtToken: 'mock-jwt-token' }})
+  )
   // @ts-ignore
-  apolloHooks.useMutation.mockImplementation(() => [
-    login
-  ])
+  graph.createClient = () => () => login
   const { findByTestId } = render(<LoginForm {...defaultProps} />)
   const email = await findByTestId('login-email')
   const password = await findByTestId('login-password')
@@ -35,7 +35,8 @@ test('click login', async () => {
   const form = await findByTestId('login-form')
   fireEvent.submit(form)
   expect(login).toBeCalledTimes(1)
-  expect(login.mock.calls[0][0]).toMatchSnapshot()
+  expect(login.mock.calls[0]).toMatchSnapshot()
+  await flushPromises()
   expect(defaultProps.updateToken).toHaveBeenCalledWith('mock-jwt-token')
 })
 
@@ -49,7 +50,7 @@ test('renders registration view', async () => {
 test('click register', async () => {
   const register = jest.fn()
   // @ts-ignore
-  apolloHooks.useMutation.mockImplementation(() => [register, {}])
+  graph.createClient = () => () => register
   const { findByTestId } = render(<LoginForm {...defaultProps} />)
   const registerLink = await findByTestId('toggle-link')
   fireEvent.click(registerLink)

@@ -6,7 +6,7 @@ import { Person } from '../schema'
 import { SignOut } from './sign-out'
 
 export type RoutingProps = {
-  currentPerson?: Person | null
+  currentUser?: Person | null
   loading?: boolean
   updateToken: (jwtToken: string) => void
 }
@@ -17,14 +17,14 @@ const routes = {
 }
 
 export const Routing: React.FC<RoutingProps> = ({
-  currentPerson,
+  currentUser,
   loading,
   updateToken
 }) => {
   const routeName = useRoutes(routes)
 
   if (routeName === 'login') {
-    return <LoginForm currentPerson={currentPerson} updateToken={updateToken} />
+    return <LoginForm currentUser={currentUser} updateToken={updateToken} />
   }
 
   if (routeName === 'signOut') {
@@ -35,7 +35,7 @@ export const Routing: React.FC<RoutingProps> = ({
     return <div>loading</div>
   }
 
-  if (!currentPerson) {
+  if (!currentUser) {
     return (
       <div>
         <div>Not logged in</div>
@@ -45,7 +45,7 @@ export const Routing: React.FC<RoutingProps> = ({
 
   return (
     <div>
-      <div>Hello: {currentPerson.fullName}</div>
+      <div>Hello: {currentUser.fullName}</div>
     </div>
   )
 }

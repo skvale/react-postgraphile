@@ -3,14 +3,14 @@
 :construction:
 
 A React app communicating with a Postgresql database
-Using React-Apollo and Postgraphile's API generation.
+Using Urql and Postgraphile's API generation.
 
 ```sh
     .+------+     +------+     +------+     +------+.
   .' |    .'|    /|     /|     |\     |\    |`.    | `.
  +---+--+'  |   +-+----+ |     | +----+-+   |  `+--+---+
  |   |  |   |   | |    | |     | |    | |   |   |  |   |
- | React|  <->  |Apollo| |<-> Postgraphile <-> Postgresql
+ | React|  <-> graphql.js| <-> Postgraphile <-> Postgresql
  |.'    | .'    |/     |/       \|     \|    `. |   `. |
  +------+'      +------    \     +------+      `+------+
                             \
@@ -23,7 +23,7 @@ Using React-Apollo and Postgraphile's API generation.
                                  +------+
 ```
 
-### You'll need
+## You'll need
 
 * [Postgresql](https://www.postgresql.org/download/)
 * react-postgraphile `git clone https://github.com/skvale/react-postgraphile`

@@ -1,31 +1,53 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { loader } from 'graphql.macro'
-import { useQuery } from '@apollo/react-hooks'
-import { Query } from '../schema'
+import { print } from 'graphql'
+import Cookies from 'js-cookie'
 import { Routing } from './routing'
 import { Nav } from './nav'
+import { createClient } from '../clients/postgraphile'
+import { useAsyncEffect } from '../utils'
 
 const currentPersonQuery = loader('./graphql/current-person-query.gql')
 
-export type AppProps = {
-  updateToken: (jwtToken: string) => void
-}
+export type AppProps = {}
 
-export const App: React.FC<AppProps> = ({ updateToken }) => {
-  const { loading, error, data: currentPersonData } = useQuery<{
-    currentPerson: Query['currentPerson']
-  }>(currentPersonQuery)
+export const App: React.FC<AppProps> = () => {
+  const [token, setToken] = useState<string>(
+    Cookies.get('postgraphile-jwt') || ''
+  )
+  const [currentUser, setUser] = useState()
+  const [error, setError] = useState()
+  const [loading, setLoading] = useState(false)
+
+  useAsyncEffect(
+    async signal => {
+      const getCurrentUser = createClient(token)(print(currentPersonQuery))
+      setLoading(true)
+      try {
+        const currentUser = await getCurrentUser()
+        if (!signal.aborted) {
+          Cookies.set('postgraphile-jwt', token || '')
+          setUser(currentUser.currentPerson)
+        }
+      } catch (e) {
+        setError(e)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [token]
+  )
+
   if (error) {
     return <div>Error: {error.message}</div>
   }
-  const currentPerson = currentPersonData && currentPersonData.currentPerson
   return (
     <div className='bg-gray-100 font-sans w-full min-h-screen m-0'>
-      <Nav currentPerson={currentPerson} />
+      <Nav currentUser={currentUser} />
       <Routing
-        currentPerson={currentPerson}
+        currentUser={currentUser}
         loading={loading}
-        updateToken={updateToken}
+        updateToken={setToken}
       />
     </div>
   )
