@@ -21,12 +21,12 @@ export const App: React.FC<AppProps> = () => {
 
   useAsyncEffect(
     async signal => {
-      const getCurrentUser = createClient(token)(print(currentPersonQuery))
+      const query = print(currentPersonQuery)
+      const getCurrentUser = createClient(token)(query)
       setLoading(true)
       try {
         const currentUser = await getCurrentUser()
         if (!signal.aborted) {
-          Cookies.set('postgraphile-jwt', token || '')
           setUser(currentUser.currentPerson)
         }
       } catch (e) {

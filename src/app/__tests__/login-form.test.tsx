@@ -23,7 +23,7 @@ test('renders', async () => {
 
 test('click login', async () => {
   const login = jest.fn(() =>
-    Promise.resolve({ authenticate: { jwtToken: 'mock-jwt-token' }})
+    Promise.resolve({ authenticate: { jwtToken: 'mock-jwt-token' } })
   )
   // @ts-ignore
   graph.createClient = () => () => login

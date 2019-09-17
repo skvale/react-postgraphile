@@ -7,7 +7,7 @@ import { LoginFormProps } from '../login-form'
 import rough from 'roughjs/dist/rough.umd'
 import * as graph from '../../clients/postgraphile'
 
-rough.svg = jest.fn(() => ({rectangle: () => document.createElement('svg')}))
+rough.svg = jest.fn(() => ({ rectangle: () => document.createElement('svg') }))
 
 function flushPromises() {
   return new Promise(resolve => setImmediate(resolve))
@@ -18,7 +18,7 @@ jest.mock('../login-form', () => ({
 }))
 
 test('renders without user', async () => {
-  const m = jest.fn(() => Promise.resolve({currentPerson: null}))
+  const m = jest.fn(() => Promise.resolve({ currentPerson: null }))
   const f = jest.fn(() => m)
   // @ts-ignore
   graph.createClient = () => f
@@ -31,7 +31,9 @@ test('renders without user', async () => {
 })
 
 test('renders with user', async () => {
-  const m = jest.fn(() => Promise.resolve({currentPerson: {fullName: 'Bobby'}}))
+  const m = jest.fn(() =>
+    Promise.resolve({ currentPerson: { fullName: 'Bobby' } })
+  )
   const f = jest.fn(() => m)
   // @ts-ignore
   graph.createClient = () => f
@@ -41,7 +43,9 @@ test('renders with user', async () => {
 })
 
 test('renders loading', () => {
-  const m = jest.fn(() => Promise.resolve({currentPerson: {fullName: 'Bobby'}}))
+  const m = jest.fn(() =>
+    Promise.resolve({ currentPerson: { fullName: 'Bobby' } })
+  )
   const f = jest.fn(() => m)
   // @ts-ignore
   graph.createClient = () => f

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { navigate } from 'hookrouter'
+import Cookies from 'js-cookie'
 
 export type SignOutProps = {
   updateToken: (jwtToken: string) => void
@@ -8,6 +9,7 @@ export type SignOutProps = {
 export const SignOut: React.FC<SignOutProps> = ({ updateToken }) => {
   useEffect(() => {
     updateToken('')
+    Cookies.remove('postgraphile-jwt')
     navigate('/')
   }, [updateToken])
 

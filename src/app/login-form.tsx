@@ -1,6 +1,7 @@
 import React from 'react'
 import { useMachine } from '@xstate/react'
 import { print } from 'graphql'
+import Cookies from 'js-cookie'
 import { useQueryParam, BooleanParam } from 'use-query-params'
 import { loader } from 'graphql.macro'
 import { Button } from '../components/button'
@@ -14,12 +15,13 @@ import {
   registerMachine,
   LoginContext
 } from '../machines/login-machine'
-import {createClient} from '../clients/postgraphile'
+import { createClient } from '../clients/postgraphile'
 
 const registerPersonMutation = loader('./graphql/register-person-mutation.gql')
 const authenticateMutation = loader('./graphql/authenticate-mutation.gql')
 
-const login = (...args: any[]) => createClient()(print(authenticateMutation))(...args)
+const login = (...args: any[]) =>
+  createClient()(print(authenticateMutation))(...args)
 const register = (...args: any[]) =>
   createClient()(print(registerPersonMutation))(...args)
 
@@ -48,8 +50,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             email,
             password
           })
+          console.log(result.authenticate)
           if (result && result.authenticate && result.authenticate.jwtToken) {
-            console.log('calling')
+            Cookies.set('postgraphile-jwt', result.authenticate.jwtToken)
             updateToken(result.authenticate.jwtToken)
             return result.authenticate.jwtToken
           } else {
