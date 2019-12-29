@@ -8,9 +8,13 @@ type TextAreaProps = {
     touched?: boolean
   }
 }
-export const TextArea: React.FC<
-  TextAreaProps & React.TextareaHTMLAttributes<HTMLTextAreaElement>
-> = ({ label, className, meta, ...textAreaProps }) => {
+export const TextArea: React.FC<TextAreaProps &
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>> = ({
+  label,
+  className,
+  meta,
+  ...textAreaProps
+}) => {
   const textAreaClasses = cx(
     'appearance-none',
     'border',

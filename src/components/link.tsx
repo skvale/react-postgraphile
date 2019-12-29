@@ -1,9 +1,9 @@
 import React from 'react'
 import { cx } from 'emotion'
 
-export const Link: React.FC<
-  React.AnchorHTMLAttributes<HTMLAnchorElement>
-> = props => {
+export const Link: React.FC<React.AnchorHTMLAttributes<
+  HTMLAnchorElement
+>> = props => {
   const linkClasses = cx(
     'cursor-pointer',
     'font-bold',

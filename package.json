@@ -40,8 +40,8 @@
     "@types/node": "^12.7.1",
     "@types/react": "^16.8.25",
     "@types/react-dom": "^16.8.5",
-    "@typescript-eslint/eslint-plugin": "^1.13.0",
-    "@typescript-eslint/parser": "^1.13.0",
+    "@typescript-eslint/eslint-plugin": "^2.13.0",
+    "@typescript-eslint/parser": "^2.13.0",
     "@xstate/test": "^0.1.0",
     "babel-plugin-import-graphql": "^2.7.0",
     "eslint-config-prettier": "^6.3.0",
@@ -59,7 +59,7 @@
     "react-scripts": "^3.0.1",
     "tailwindcss": "^1.1.1",
     "ts-jest": "^24.0.2",
-    "typescript": "^3.5.3"
+    "typescript": "^3.7.4"
   },
   "browserslist": [
     ">0.2%",

@@ -12,9 +12,14 @@ type SelectProps = {
   upperCase?: boolean
 }
 
-export const Select: React.FC<
-  SelectProps & React.SelectHTMLAttributes<HTMLSelectElement>
-> = ({ label, className, options = [], upperCase, ...selectProps }) => {
+export const Select: React.FC<SelectProps &
+  React.SelectHTMLAttributes<HTMLSelectElement>> = ({
+  label,
+  className,
+  options = [],
+  upperCase,
+  ...selectProps
+}) => {
   const labelClasses = cx(
     'block',
     upperCase && 'uppercase tracking-wide',

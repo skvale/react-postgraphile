@@ -3,9 +3,9 @@ import { cx } from 'emotion'
 
 type Color = 'blue' | 'gray'
 
-export const Button: React.FC<
-  { color?: Color } & React.ButtonHTMLAttributes<HTMLButtonElement>
-> = ({ color = 'blue', ...props }) => {
+export const Button: React.FC<{ color?: Color } & React.ButtonHTMLAttributes<
+  HTMLButtonElement
+>> = ({ color = 'blue', ...props }) => {
   const colors = {
     blue: ['bg-blue-500', 'hover:bg-blue-700', 'text-white'],
     gray: ['bg-gray-300', 'hover:bg-gray-500']

@@ -8,9 +8,12 @@ type InputProps = {
     touched?: boolean
   }
 }
-export const Input: React.FC<
-  InputProps & React.InputHTMLAttributes<HTMLInputElement>
-> = ({ label, meta = {}, ...props }) => {
+export const Input: React.FC<InputProps &
+  React.InputHTMLAttributes<HTMLInputElement>> = ({
+  label,
+  meta = {},
+  ...props
+}) => {
   const inputClasses = cx(
     'appearance-none',
     'border',

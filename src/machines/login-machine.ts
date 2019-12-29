@@ -107,7 +107,7 @@ export const baseMachine = {
   }
 }
 
-export const loginMachine = Machine<LoginContext>(baseMachine)
+export const loginMachine = Machine(baseMachine)
 
 export const registerMachine = Machine<LoginContext>({
   ...baseMachine,
